@@ -42,8 +42,8 @@ void Generator::GenerateAll(Assembler* assembler) {
 static int Main(int argc, char** argv) {
   Flags::ExtractFromCommandLine(&argc, argv);
   Fletch::Setup();
-  Assembler assembler;
-  Generator::GenerateAll(&assembler);
+  // Assembler assembler;
+  // Generator::GenerateAll(&assembler);
   Fletch::TearDown();
   return 0;
 }

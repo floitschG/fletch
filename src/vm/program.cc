@@ -12,12 +12,12 @@
 #include "src/shared/utils.h"
 #include "src/shared/selectors.h"
 #include "src/shared/platform.h"
+#include "src/shared/names.h"
 
 #include "src/vm/heap_validator.h"
 #include "src/vm/object.h"
 #include "src/vm/process.h"
 #include "src/vm/port.h"
-#include "src/vm/session.h"
 
 namespace fletch {
 
@@ -38,7 +38,7 @@ Program::Program()
       random_(0),
       heap_(&random_),
       scheduler_(NULL),
-      session_(NULL),
+      program_heap_extension_(NULL),
       entry_(NULL),
       classes_(NULL),
       constants_(NULL),
@@ -611,7 +611,9 @@ void Program::IterateRoots(PointerVisitor* visitor) {
   visitor->Visit(reinterpret_cast<Object**>(&static_fields_));
   visitor->Visit(reinterpret_cast<Object**>(&dispatch_table_));
   visitor->Visit(reinterpret_cast<Object**>(&vtable_));
-  if (session_ != NULL) session_->IteratePointers(visitor);
+  if (program_heap_extension_ != NULL) {
+    program_heap_extension_->IteratePointers(visitor);
+  }
 }
 
 void Program::ClearDispatchTableIntrinsics() {

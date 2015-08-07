@@ -27,7 +27,9 @@ static bool RunSnapshot(List<uint8> bytes) {
     SnapshotReader reader(bytes);
     Program* program = reader.ReadProgram();
     Scheduler scheduler;
+#ifndef FLETCH_BAREMETAL
     ProgramFolder::FoldProgramByDefault(program);
+#endif
     Process* process = program->ProcessSpawnForMain();
     scheduler.ScheduleProgram(program, process);
     bool success = scheduler.Run();

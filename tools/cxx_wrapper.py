@@ -40,6 +40,17 @@ def invoke_gcc_arm64(args):
   args.insert(0, "aarch64-linux-gnu-g++-4.8")
   os.execv("/usr/bin/aarch64-linux-gnu-g++-4.8", args)
 
+def invoke_gcc_lkarm(args):
+  path = "/usr/bin/arm-none-eabi-g++";
+  args.append("-std=c++11");
+  #args.append("-march=armv7-m");
+  args.append("-mthumb");
+  args.append("-mthumb-interwork");
+  args.append("-mcpu=cortex-m4");
+  #args.append("-mfloat-abi=hard");
+  args.append("-include");
+  args.append(os.environ["LK_BASE"] + "/build-stm32746g-eval2-test/config.h");
+  subprocess.check_call([path] + args)
 
 def main():
   args = sys.argv[1:]
@@ -62,6 +73,11 @@ def main():
   elif "-L/FLETCH_ARM64" in args:
     args.remove("-L/FLETCH_ARM64")
     invoke_gcc_arm64(args)
+  elif "-DFLETCH_LKARM" in args:
+    invoke_gcc_lkarm(args)
+  elif "-L/FLETCH_LKARM" in args:
+    args.remove("-L/FLETCH_LKARM")
+    invoke_gcc_lkarm(args)
   else:
     invoke_gcc(args)
 

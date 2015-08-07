@@ -16,6 +16,7 @@
 #include "src/vm/port.h"
 #include "src/vm/process.h"
 #include "src/vm/stack_walker.h"
+#include "src/vm/debug_info.h"
 
 #define GC_AND_RETRY_ON_ALLOCATION_FAILURE_OR_SIGNAL_SCHEDULER(var, exp) \
   Object* var = (exp);                                                   \
@@ -303,7 +304,7 @@ Interpreter::InterruptKind Engine::Interpret(
     Boxed* boxed = Boxed::cast(Local(offset));
     boxed->set_value(value);
 
-    if (value->IsHeapObject() && value->IsImmutable()) {
+    if (false && value->IsHeapObject() && value->IsImmutable()) {
       process()->store_buffer()->Insert(boxed);
     }
 

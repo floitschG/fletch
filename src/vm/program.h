@@ -79,6 +79,14 @@ class ProgramState {
   bool is_paused_;
 };
 
+// A program can be extended with a set of roots, defined by a
+// ProgramHeapExtension. If the program has a heap extension, the roots will be
+// visited and updated on GC.
+class ProgramHeapExtension {
+ public:
+  virtual void IteratePointers(PointerVisitor* visitor) = 0;
+};
+
 class Program {
  public:
   Program();
@@ -140,13 +148,11 @@ class Program {
 
   EventHandler* event_handler() { return &event_handler_; }
 
-  // TODO(ager): Support more than one active session at a time.
-  void AddSession(Session* session) {
-    ASSERT(session_ == NULL);
-    session_ = session;
+  // TODO(ager): Support more than one active extension at a time.
+  void AddProgramHeapExtension(ProgramHeapExtension* value) {
+    ASSERT(program_heap_extension_ == NULL);
+    program_heap_extension_ = value;
   }
-
-  Session* session() { return session_; }
 
   Heap* heap() { return &heap_; }
 
@@ -249,8 +255,7 @@ class Program {
 
   EventHandler event_handler_;
 
-  // Session operating on this program.
-  Session* session_;
+  ProgramHeapExtension* program_heap_extension_;
 
   Function* entry_;
   int main_arity_;

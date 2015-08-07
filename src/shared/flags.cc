@@ -67,7 +67,12 @@ static void PrintFlags() {
   APPLY_TO_FLAGS(PRINT_DEBUG_FLAG, PRINT_RELEASE_FLAG);
 
   // Terminate the process with error code.
+#ifdef FLETCH_BAREMETAL
+  // TODO(lk): Find a better way to return control.
+  abort();
+#else
   exit(-1);
+#endif
 }
 
 static bool FlagMatches(const char* a, const char* b) {
@@ -105,12 +110,18 @@ static bool ProcessFlagInteger(const char* name_ptr, const char* value_ptr,
                                const char* name, int* field) {
   // -Xname=<int>
   if (FlagMatches(name_ptr, name)) {
+#ifdef FLETCH_BAREMETAL
+    // TODO(lk): We need strtol to detect errors.
+    *field = atol(value_ptr);
+    return true;
+#else
     char* end;
     int value = strtol(value_ptr, &end, 10);  // NOLINT
     if (*end == '\0') {
       *field = value;
       return true;
     }
+#endif
   }
   return false;
 }
@@ -147,7 +158,12 @@ static void ProcessArgument(const char* argument) {
   APPLY_TO_FLAGS(PROCESS_DEBUG_FLAG, PROCESS_RELEASE_FLAG);
   Print::Out("Failed to recognize flag argument: %s\n", argument);
   // Terminate the process with error code.
+#ifdef FLETCH_BAREMETAL
+  // TODO(lk): Find a better way to return control.
+  abort();
+#else
   exit(-1);
+#endif
 }
 
 void Flags::ExtractFromCommandLine(int* argc, char** argv) {

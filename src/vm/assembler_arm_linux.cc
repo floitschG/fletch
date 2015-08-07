@@ -11,6 +11,8 @@ namespace fletch {
 
 void Assembler::Bind(const char* name) {
   putchar('\n');
+  printf("\t.thumb\n");
+  printf("\t.thumb_func\n");
   printf("\t.type %s, %%function\n", name);
   printf("\t.align 4\n");
   printf("\t.code 32\n");

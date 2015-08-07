@@ -12,6 +12,7 @@
 #include "src/vm/object_map.h"
 #include "src/vm/process.h"
 #include "src/vm/scheduler.h"
+#include "src/vm/session_debug_info.h"
 #include "src/vm/snapshot.h"
 #include "src/vm/stack_walker.h"
 #include "src/vm/thread.h"
@@ -74,7 +75,7 @@ Session::~Session() {
 void Session::Initialize() {
   program_ = new Program();
   program()->Initialize();
-  program()->AddSession(this);
+  program()->AddProgramHeapExtension(this);
 }
 
 static void* MessageProcessingThread(void* data) {
@@ -177,6 +178,7 @@ void Session::ProcessMessages() {
 
       case Connection::kCompilerError: {
         debugging_ = false;
+        program()->scheduler()->clear_process_event_handler();
         SignalMainThread(kError);
         return;
       }
@@ -202,7 +204,7 @@ void Session::ProcessMessages() {
       case Connection::kProcessSetBreakpoint: {
         WriteBuffer buffer;
         if (process_->debug_info() == NULL) {
-          process_->AttachDebugger();
+          process_->AttachDebugger(new SessionDebugInfo());
         }
         int bytecode_index = connection_->ReadInt();
         Function* function = Function::cast(Pop());
@@ -300,13 +302,14 @@ void Session::ProcessMessages() {
 
       case Connection::kSessionEnd: {
         debugging_ = false;
+        program()->scheduler()->clear_process_event_handler();
         // If execution is paused we delete the process to allow the
         // VM to terminate.
         if (execution_paused_) {
           Scheduler* scheduler = program()->scheduler();
           switch (process_->state()) {
             case Process::kBreakPoint:
-              scheduler->ExitAtBreakpoint(process_);
+              scheduler->ExitAtBreakPoint(process_);
               break;
             case Process::kCompileTimeError:
               scheduler->ExitAtCompileTimeError(process_);
@@ -330,6 +333,8 @@ void Session::ProcessMessages() {
         ConnectionPrintInterceptor* interceptor =
             new ConnectionPrintInterceptor(connection_);
         Print::RegisterPrintInterceptor(interceptor);
+        Scheduler* scheduler = program()->scheduler();
+        if (scheduler != NULL) scheduler->set_process_event_handler(this);
         debugging_ = true;
         break;
       }
@@ -592,6 +597,7 @@ bool Session::ProcessRun() {
 
         {
           Scheduler scheduler;
+          if (debugging_) scheduler.set_process_event_handler(this);
           scheduler.ScheduleProgram(program_, process_);
           result = scheduler.Run();
           scheduler.UnscheduleProgram(program_);
@@ -1092,6 +1098,21 @@ bool Session::CompileTimeError(Process* process) {
     return true;
   }
   return false;
+}
+
+void Session::PrepareProgramForRunning(Program* program) {
+  // For testing purposes, we support unfolding the program
+  // before running it.
+  bool unfold = Flags::unfold_program;
+  ProgramFolder program_folder(program);
+  if (program->is_compact()) {
+    if (unfold) {
+      program_folder.Unfold();
+    }
+  } else if (!unfold) {
+    program_folder.Fold();
+  }
+  ASSERT(program->is_compact() == !unfold);
 }
 
 class TransformInstancesPointerVisitor : public PointerVisitor {

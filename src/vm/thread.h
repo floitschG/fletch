@@ -8,6 +8,9 @@
 #include "src/shared/globals.h"
 #include "src/shared/platform.h"
 
+#if defined(FLETCH_TARGET_OS_LK)
+#include "src/vm/thread_lk.h"
+#endif
 #if defined(FLETCH_TARGET_OS_POSIX)
 #include "src/vm/thread_posix.h"
 #endif

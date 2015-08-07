@@ -13,12 +13,20 @@
 #define __STDC_LIMIT_MACROS
 #endif
 
+// hack to get the STDC type defines for limits.h
+#if defined(FLETCH_BAREMETAL) && not defined(__STDC_VERSION__)
+#define __STDC_VERSION__ 199901L
+#endif
 #include <inttypes.h>
+
 #include <limits.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
+
+#ifndef FLETCH_BAREMETAL
 #include <unistd.h>
+#endif
 
 // Types for native machine words. Guaranteed to be able to hold
 // pointers and integers.

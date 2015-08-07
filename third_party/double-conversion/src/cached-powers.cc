@@ -143,8 +143,13 @@ void PowersOfTenCache::GetCachedPowerForBinaryExponentRange(
     int max_exponent,
     DiyFp* power,
     int* decimal_exponent) {
+#ifdef FLETCH_BAREMETAL
+  abort();
+  double k = 0.0 * kD_1_LOG2_10;
+#else
   int kQ = DiyFp::kSignificandSize;
   double k = ceil((min_exponent + kQ - 1) * kD_1_LOG2_10);
+#endif
   int foo = kCachedPowersOffset;
   int index =
       (foo + static_cast<int>(k) - 1) / kDecimalExponentDistance + 1;

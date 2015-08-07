@@ -526,6 +526,11 @@ static double RadixStringToIeee(Iterator* current,
                                 double junk_string_value,
                                 bool read_as_double,
                                 bool* result_is_junk) {
+#ifdef FLETCH_BAREMETAL
+  abort();
+  IsCharacterDigitForRadix(0, 0, 'a');
+  return 0.0;
+#else
   ASSERT(*current != end);
 
   const int kDoubleSize = Double::kSignificandSize;
@@ -627,6 +632,7 @@ static double RadixStringToIeee(Iterator* current,
 
   ASSERT(number != 0);
   return Double(DiyFp(number, exponent)).value();
+#endif
 }
 
 

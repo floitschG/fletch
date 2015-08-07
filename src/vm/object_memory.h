@@ -132,7 +132,11 @@ class Space {
  private:
   friend class NoAllocationFailureScope;
 
+#ifdef FLETCH_BAREMETAL
+  static const int kDefaultChunkSize = 8 * KB;
+#else
   static const int kDefaultChunkSize = 128 * KB;
+#endif
 
   uword TryAllocate(int size);
   uword AllocateInNewChunk(int size);

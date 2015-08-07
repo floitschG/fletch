@@ -31,6 +31,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef FLETCH_BAREMETAL
+// TODO(lk): Find a better way to make this compose.
+#undef ASSERT
+#endif
 #include <assert.h>
 #ifndef ASSERT
 #define ASSERT(condition)         \

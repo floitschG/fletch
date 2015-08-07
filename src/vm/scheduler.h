@@ -5,6 +5,8 @@
 #ifndef SRC_VM_SCHEDULER_H_
 #define SRC_VM_SCHEDULER_H_
 
+#include "src/shared/atomic.h"
+
 #include "src/vm/thread_pool.h"
 
 namespace fletch {
@@ -22,6 +24,14 @@ class ProcessVisitor {
   virtual ~ProcessVisitor() { }
 
   virtual void VisitProcess(Process* process) = 0;
+};
+
+class ProcessEventHandler {
+ public:
+  virtual bool UncaughtException(Process* process) = 0;
+  virtual bool BreakPoint(Process* process) = 0;
+  virtual bool ProcessTerminated(Process* process) = 0;
+  virtual bool CompileTimeError(Process* process) = 0;
 };
 
 class Scheduler {
@@ -62,15 +72,21 @@ class Scheduler {
   //   * uncaught exception
   //   * compile-time error
   //   * break point
-  // these are the default implementations. They might be invoked if no session
-  // is attached or the session might call them if it is about to end.
-  //
-  // TODO(kustermann): Once we've made more progress on the design of a
-  // multiprocess system, we should consider making an abstraction for these.
+  // these are the default implementations. They might be invoked if no process
+  // event handler is attached or from elsewhere in the program.
   void ExitAtTermination(Process* process, ThreadState* thread_state = NULL);
   void ExitAtUncaughtException(Process* process);
   void ExitAtCompileTimeError(Process* process);
-  void ExitAtBreakpoint(Process* process);
+  void ExitAtBreakPoint(Process* process);
+
+  ProcessEventHandler* process_event_handler() const {
+    return process_event_handler_;
+  }
+  void set_process_event_handler(ProcessEventHandler* value) {
+    ASSERT(value != NULL);
+    process_event_handler_ = value;
+  }
+  void clear_process_event_handler() { process_event_handler_ = NULL; }
 
   size_t process_count() const { return processes_; }
 
@@ -78,20 +94,22 @@ class Scheduler {
   const int max_threads_;
   ThreadPool thread_pool_;
   Monitor* preempt_monitor_;
-  std::atomic<int> processes_;
-  std::atomic<int> sleeping_threads_;
-  std::atomic<int> thread_count_;
-  std::atomic<ThreadState*> idle_threads_;
-  std::atomic<ThreadState*>* threads_;
-  std::atomic<ThreadState*> temporary_thread_states_;
-  std::atomic<int> foreign_threads_;
+  Atomic<int> processes_;
+  Atomic<int> sleeping_threads_;
+  Atomic<int> thread_count_;
+  Atomic<ThreadState*> idle_threads_;
+  Atomic<ThreadState*>* threads_;
+  Atomic<ThreadState*> temporary_thread_states_;
+  Atomic<int> foreign_threads_;
   ProcessQueue* startup_queue_;
 
   Monitor* pause_monitor_;
-  std::atomic<bool> pause_;
-  std::atomic<Process*>* current_processes_;
+  Atomic<bool> pause_;
+  Atomic<Process*>* current_processes_;
 
   GCThread* gc_thread_;
+
+  ProcessEventHandler* process_event_handler_;
 
   void DeleteProcessAndMergeHeaps(Process* process, ThreadState* thread_state);
   void RescheduleProcess(Process* process, ThreadState* state, bool terminate);

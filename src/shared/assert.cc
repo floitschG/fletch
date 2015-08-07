@@ -5,10 +5,14 @@
 #include "src/shared/assert.h"
 
 #include <stdarg.h>
+#ifdef FLETCH_BAREMETAL
+#include <stdlib.h>
+#else
 #include <cxxabi.h>
 #include <execinfo.h>
-
 #include <cstdlib>
+#endif
+
 
 #include "src/shared/utils.h"
 
@@ -26,6 +30,9 @@ void DynamicAssertionHelper::Fail(const char* format, ...) {
 
   DumpStacktrace();
 
+#ifdef FLETCH_BAREMETAL
+  abort();
+#else
   // In case of failed assertions, abort right away. Otherwise, wait
   // until the program is exiting before producing a non-zero exit
   // code through abort.
@@ -33,11 +40,13 @@ void DynamicAssertionHelper::Fail(const char* format, ...) {
   static bool failed = false;
   if (!failed) std::atexit(std::abort);
   failed = true;
+#endif
 }
 
 // NOTE: This function uses compiler-specific features to retrieve
 // the current stacktrace.
 void DynamicAssertionHelper::DumpStacktrace() {
+#ifndef FLETCH_BAREMETAL
   const int kMaxFrames = 200;
   void* buffer[kMaxFrames];
 
@@ -93,6 +102,9 @@ void DynamicAssertionHelper::DumpStacktrace() {
     Print::Error("\n");
     free(strings);
   } else {
+#else /* not FLETCH_BAREMETAL */
+  {
+#endif /* not FLETCH_BAREMETAL */
     Print::Error("\nCould not get a stacktrace.\n");
   }
 }

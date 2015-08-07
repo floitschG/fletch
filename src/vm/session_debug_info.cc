@@ -2,7 +2,7 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE.md file.
 
-#include "src/vm/debug_info.h"
+#include "src/vm/session_debug_info.h"
 
 #include "src/vm/object.h"
 #include "src/vm/process.h"
@@ -32,13 +32,13 @@ void Breakpoint::VisitProgramPointers(PointerVisitor* visitor) {
   visitor->Visit(reinterpret_cast<Object**>(&function_));
 }
 
-DebugInfo::DebugInfo()
+SessionDebugInfo::SessionDebugInfo()
     : is_stepping_(false),
       is_at_breakpoint_(false),
       current_breakpoint_id_(kNoBreakpointId),
       next_breakpoint_id_(0) { }
 
-bool DebugInfo::ShouldBreak(uint8_t* bcp, Object** sp) {
+bool SessionDebugInfo::ShouldBreak(uint8_t* bcp, Object** sp) {
   BreakpointMap::const_iterator it = breakpoints_.find(bcp);
   if (it != breakpoints_.end()) {
     const Breakpoint& breakpoint = it->second;
@@ -62,7 +62,7 @@ bool DebugInfo::ShouldBreak(uint8_t* bcp, Object** sp) {
   return false;
 }
 
-int DebugInfo::SetBreakpoint(Function* function,
+int SessionDebugInfo::SetBreakpoint(Function* function,
                              int bytecode_index,
                              bool one_shot,
                              Coroutine* coroutine,
@@ -80,7 +80,7 @@ int DebugInfo::SetBreakpoint(Function* function,
   return breakpoint.id();
 }
 
-bool DebugInfo::DeleteBreakpoint(int id) {
+bool SessionDebugInfo::DeleteBreakpoint(int id) {
   BreakpointMap::const_iterator it = breakpoints_.begin();
   BreakpointMap::const_iterator end = breakpoints_.end();
   for (; it != end; ++it) {
@@ -93,7 +93,7 @@ bool DebugInfo::DeleteBreakpoint(int id) {
   return false;
 }
 
-void DebugInfo::VisitPointers(PointerVisitor* visitor) {
+void SessionDebugInfo::VisitPointers(PointerVisitor* visitor) {
   BreakpointMap::iterator it = breakpoints_.begin();
   BreakpointMap::iterator end = breakpoints_.end();
   for (; it != end; ++it) {
@@ -101,7 +101,7 @@ void DebugInfo::VisitPointers(PointerVisitor* visitor) {
   }
 }
 
-void DebugInfo::VisitProgramPointers(PointerVisitor* visitor) {
+void SessionDebugInfo::VisitProgramPointers(PointerVisitor* visitor) {
   BreakpointMap::iterator it = breakpoints_.begin();
   BreakpointMap::iterator end = breakpoints_.end();
   for (; it != end; ++it) {
@@ -109,7 +109,7 @@ void DebugInfo::VisitProgramPointers(PointerVisitor* visitor) {
   }
 }
 
-void DebugInfo::UpdateBreakpoints() {
+void SessionDebugInfo::UpdateBreakpoints() {
   BreakpointMap new_breakpoints;
   BreakpointMap::const_iterator it = breakpoints_.begin();
   BreakpointMap::const_iterator end = breakpoints_.end();

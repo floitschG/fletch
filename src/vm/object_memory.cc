@@ -306,7 +306,7 @@ Chunk* ObjectMemory::AllocateChunk(Space* owner, int size) {
 
   size = Utils::RoundUp(size, kPageSize);
   void* memory;
-#ifdef ANDROID
+#if defined(ANDROID) || defined(FLETCH_BAREMETAL)
   // posix_memalign doesn't exist on Android. We fallback to
   // memalign.
   memory = memalign(kPageSize, size);
@@ -376,7 +376,8 @@ void ObjectMemory::SetSpaceForPages(uword base, uword limit, Space* space) {
       // gets to initialize the directory entry.
       table = GetPageTable(address);
       if (table == NULL) {
-        SetPageTable(address, table = new PageTable(address & ~0x3fffff));
+        table = new PageTable(address & ~0x3fffff);
+        SetPageTable(address, table);
       }
     }
     table->Set((address >> 12) & 0x3ff, space);

@@ -427,6 +427,77 @@
         },
       },
 
+      'fletch_xlkarm': {
+        'abstract': 1,
+
+        'defines': [
+          'FLETCH32',
+          'FLETCH_TARGET_ARM',
+        ],
+
+        'xcode_settings': { # And ninja.
+          'OTHER_CPLUSPLUSFLAGS': [
+            '-g',
+          ],
+        },
+
+        'cflags': [
+          '-g',
+        ],
+
+        'target_conditions': [
+          ['_toolset=="target"', {
+              'conditions': [
+                ['OS=="linux"', {
+                  'defines': [
+                    # Fake define intercepted by cc_wrapper.py to change the
+                    # compiler binary to an ARM cross compiler. This is only
+                    # needed on linux.
+                    'FLETCH_LKARM',
+                   ],
+                 }]
+              ],
+
+              'defines!': [
+                'FLETCH_TARGET_OS_LINUX', 
+                'FLETCH_TARGET_OS_POSIX',
+              ],
+ 
+              'defines': [
+                'FLETCH_TARGET_OS_LK',
+                'FLETCH_BAREMETAL',
+              ],
+
+              'include_dirs': [ 
+                '<!(echo "$LK_BASE/include")',
+                '<!(echo "$LK_BASE/lib/lwip/include")',
+                '<!(echo "$LK_BASE/lib/lwip/include/ipv4")',
+                '<!(echo "$LK_BASE/lib/libm/include")',
+                '<!(echo "$LK_BASE/arch/arm/include")',
+                '<!(echo "$LK_BASE/arch/arm/arm/include")',
+              ],
+
+              'ldflags': [
+                '-L<(third_party_libs_path)/arm',
+                # Fake define intercepted by cc_wrapper.py.
+                '-L/FLETCH_LKARM',
+                '-static-libstdc++',
+              ],
+            },
+          ],
+
+          ['_toolset=="host"', {
+              # Compile host targets as IA32, to get same word size.
+              'inherit_from': [ 'fletch_ia32' ],
+
+              # Undefine IA32 target and using existing ARM target.
+              'defines!': [
+                'FLETCH_TARGET_IA32',
+              ],
+            },
+          ],
+        ],
+      },
       'ReleaseIA32': {
         'inherit_from': [ 'fletch_base', 'fletch_release', 'fletch_ia32' ],
       },
@@ -479,6 +550,10 @@
 
       'ReleaseXARM': {
         'inherit_from': [ 'fletch_base', 'fletch_release', 'fletch_xarm' ],
+      },
+
+      'ReleaseXLKARM': {
+        'inherit_from': [ 'fletch_base', 'fletch_release', 'fletch_xlkarm' ],
       },
 
       'ReleaseXARMAndroid': {
@@ -542,6 +617,10 @@
 
       'DebugXARM': {
         'inherit_from': [ 'fletch_base', 'fletch_debug', 'fletch_xarm' ],
+      },
+
+      'DebugXLKARM': {
+        'inherit_from': [ 'fletch_base', 'fletch_debug', 'fletch_xlkarm' ],
       },
 
       'DebugXARMAndroid': {

@@ -4,9 +4,11 @@
 
 #include "src/vm/ffi.h"
 
+#ifndef FLETCH_BAREMETAL
 #include <dlfcn.h>
-#include <errno.h>
 #include <sys/param.h>
+#endif
+#include <errno.h>
 
 #include "src/shared/asan_helper.h"
 #include "src/shared/platform.h"
@@ -58,11 +60,15 @@ void ForeignFunctionInterface::AddDefaultSharedLibrary(const char* library) {
 }
 
 static void* PerformForeignLookup(const char* library, const char* name) {
+#ifdef FLETCH_BAREMETAL
+  return NULL;
+#else
   void* handle = dlopen(library, RTLD_LOCAL | RTLD_LAZY);
   if (handle == NULL) return NULL;
   void* result = dlsym(handle, name);
   if (dlclose(handle) != 0) return NULL;
   return result;
+#endif
 }
 
 void* ForeignFunctionInterface::LookupInDefaultLibraries(const char* symbol) {
@@ -77,6 +83,9 @@ void* ForeignFunctionInterface::LookupInDefaultLibraries(const char* symbol) {
 }
 
 NATIVE(ForeignLibraryLookup) {
+#ifdef FLETCH_BAREMETAL
+  return Failure::index_out_of_bounds();
+#else
   char* library = arguments[0]->IsString()
       ? AsForeignString(String::cast(arguments[0]))
       : NULL;
@@ -88,9 +97,13 @@ NATIVE(ForeignLibraryLookup) {
   return result != NULL
       ? process->ToInteger(reinterpret_cast<intptr_t>(result))
       : Failure::index_out_of_bounds();
+#endif
 }
 
 NATIVE(ForeignLibraryGetFunction) {
+#ifdef FLETCH_BAREMETAL
+  return Failure::index_out_of_bounds();
+#else
   word address = AsForeignWord(arguments[0]);
   void* handle = reinterpret_cast<void*>(address);
   char* name = AsForeignString(String::cast(arguments[1]));
@@ -102,9 +115,13 @@ NATIVE(ForeignLibraryGetFunction) {
   return result != NULL
       ? process->ToInteger(reinterpret_cast<intptr_t>(result))
       : Failure::index_out_of_bounds();
+#endif
 }
 
 NATIVE(ForeignLibraryBundlePath) {
+#ifdef FLETCH_BAREMETAL
+  return Failure::index_out_of_bounds();
+#else
   char* library = AsForeignString(String::cast(arguments[0]));
   char executable[MAXPATHLEN + 1];
   GetPathOfExecutable(executable, sizeof(executable));
@@ -121,9 +138,13 @@ NATIVE(ForeignLibraryBundlePath) {
     return Failure::index_out_of_bounds();
   }
   return process->NewStringFromAscii(List<const char>(result, strlen(result)));
+#endif
 }
 
 NATIVE(ForeignLibraryClose) {
+#ifdef FLETCH_BAREMETAL
+  return Failure::index_out_of_bounds();
+#else
   word address = AsForeignWord(arguments[0]);
   void* handle = reinterpret_cast<void*>(address);
   if (dlclose(handle) != 0)  {
@@ -131,6 +152,7 @@ NATIVE(ForeignLibraryClose) {
     return Failure::index_out_of_bounds();
   }
   return NULL;
+#endif
 }
 
 NATIVE(ForeignLookup) {

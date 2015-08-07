@@ -11,7 +11,6 @@
 #include "src/vm/port.h"
 #include "src/vm/process.h"
 #include "src/vm/process_queue.h"
-#include "src/vm/session.h"
 #include "src/vm/thread.h"
 
 namespace fletch {
@@ -27,14 +26,15 @@ Scheduler::Scheduler()
       sleeping_threads_(0),
       thread_count_(0),
       idle_threads_(kEmptyThreadState),
-      threads_(new std::atomic<ThreadState*>[max_threads_]),
+      threads_(new Atomic<ThreadState*>[max_threads_]),
       temporary_thread_states_(NULL),
       foreign_threads_(0),
       startup_queue_(new ProcessQueue()),
       pause_monitor_(Platform::CreateMonitor()),
       pause_(false),
-      current_processes_(new std::atomic<Process*>[max_threads_]),
-      gc_thread_(NULL) {
+      current_processes_(new Atomic<Process*>[max_threads_]),
+      gc_thread_(NULL),
+      process_event_handler_(NULL) {
   for (int i = 0; i < max_threads_; i++) {
     threads_[i] = NULL;
     current_processes_[i] = NULL;
@@ -350,17 +350,29 @@ void Scheduler::ExitAtTermination(Process* process,
 
 void Scheduler::ExitAtUncaughtException(Process* process) {
   ASSERT(process->state() == Process::kUncaughtException);
+#ifdef FLETCH_BAREMETAL
+  abort();
+#else
   exit(255);
+#endif
 }
 
 void Scheduler::ExitAtCompileTimeError(Process* process) {
   ASSERT(process->state() == Process::kCompileTimeError);
+#ifdef FLETCH_BAREMETAL
+  abort();
+#else
   exit(254);
+#endif
 }
 
-void Scheduler::ExitAtBreakpoint(Process* process) {
+void Scheduler::ExitAtBreakPoint(Process* process) {
   ASSERT(process->state() == Process::kBreakPoint);
+#ifdef FLETCH_BAREMETAL
+  abort();
+#else
   exit(0);
+#endif
 }
 
 void Scheduler::RescheduleProcess(Process* process,
@@ -630,10 +642,8 @@ Process* Scheduler::InterpretProcess(Process* process,
 
   if (interpreter.IsTerminated()) {
     process->ChangeState(Process::kRunning, Process::kTerminated);
-    Session* session = process->program()->session();
-    if (session == NULL ||
-        !session->is_debugging() ||
-        !session->ProcessTerminated(process)) {
+    if (process_event_handler_ == NULL ||
+        !process_event_handler_->ProcessTerminated(process)) {
       ExitAtTermination(process, thread_state);
     }
     return NULL;
@@ -641,10 +651,8 @@ Process* Scheduler::InterpretProcess(Process* process,
 
   if (interpreter.IsUncaughtException()) {
     process->ChangeState(Process::kRunning, Process::kUncaughtException);
-    Session* session = process->program()->session();
-    if (session == NULL ||
-        !session->is_debugging() ||
-        !session->UncaughtException(process)) {
+    if (process_event_handler_ == NULL ||
+        !process_event_handler_->UncaughtException(process)) {
       ExitAtUncaughtException(process);
     }
     return NULL;
@@ -652,10 +660,8 @@ Process* Scheduler::InterpretProcess(Process* process,
 
   if (interpreter.IsCompileTimeError()) {
     process->ChangeState(Process::kRunning, Process::kCompileTimeError);
-    Session* session = process->program()->session();
-    if (session == NULL ||
-        !session->is_debugging() ||
-        !session->CompileTimeError(process)) {
+    if (process_event_handler_ == NULL ||
+        !process_event_handler_->CompileTimeError(process)) {
       ExitAtCompileTimeError(process);
     }
     return NULL;
@@ -663,14 +669,12 @@ Process* Scheduler::InterpretProcess(Process* process,
 
   if (interpreter.IsAtBreakPoint()) {
     process->ChangeState(Process::kRunning, Process::kBreakPoint);
-    Session* session = process->program()->session();
-    if (session == NULL ||
-        !session->is_debugging() ||
-        !session->BreakPoint(process)) {
-      // We should only reach a breakpoint if a session is attached and it can
-      // handle [process].
-      FATAL("We should never hit a breakpoint without a session being able to "
-            "handle it.");
+    if (process_event_handler_ == NULL ||
+        !process_event_handler_->BreakPoint(process)) {
+      // We should only reach a breakpoint if the process event handler is
+      // attached and it can handle [process].
+      FATAL("We should never hit a breakpoint without a process event handler"
+            " being able to handle it.");
     }
     return NULL;
   }

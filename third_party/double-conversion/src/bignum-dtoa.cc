@@ -383,6 +383,10 @@ static void BignumToFixed(int requested_digits, int* decimal_point,
 //
 // Note: e >= 0 => EstimatedPower(e) > 0. No similar claim can be made for e<0.
 static int EstimatePower(int exponent) {
+#ifdef FLETCH_BAREMETAL
+  abort();
+  return 0.0;
+#else
   // This function estimates log10 of v where v = f*2^e (with e == exponent).
   // Note that 10^floor(log10(v)) <= v, but v <= 10^ceil(log10(v)).
   // Note that f is bounded by its container size. Let p = 53 (the double's
@@ -410,6 +414,7 @@ static int EstimatePower(int exponent) {
   const int kSignificandSize = Double::kSignificandSize;
   double estimate = ceil((exponent + kSignificandSize - 1) * k1Log10 - 1e-10);
   return static_cast<int>(estimate);
+#endif
 }
 
 

@@ -4,7 +4,9 @@
 
 #include "src/vm/event_handler.h"
 
+#ifndef FLETCH_BAREMETAL
 #include <unistd.h>
+#endif
 
 #include "src/shared/flags.h"
 
@@ -24,13 +26,14 @@ EventHandler::EventHandler()
 }
 
 EventHandler::~EventHandler() {
+#ifndef FLETCH_BAREMETAL
   if (fd_ != -1) {
     monitor_->Lock();
     close(write_fd_);
     while (fd_ != -1) monitor_->Wait();
     monitor_->Unlock();
   }
-
+#endif
   delete monitor_;
 }
 
@@ -49,7 +52,9 @@ int EventHandler::GetEventHandler() {
   fd_ = Create();
   monitor_->Unlock();
   int fds[2];
+#ifndef FLETCH_BAREMETAL
   if (pipe(fds) != 0) FATAL("Failed to start the event handler pipe\n");
+#endif
   read_fd_ = fds[0];
   write_fd_ = fds[1];
   Thread::Run(RunEventHandler, reinterpret_cast<void*>(this));

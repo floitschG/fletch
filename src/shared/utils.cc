@@ -2,6 +2,9 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE.md file.
 
+#include <stdlib.h>  // for malloc/free on LK
+#include <stdarg.h>  // for va_start, va_end and va_list
+
 #include "src/shared/utils.h"
 
 namespace fletch {
@@ -9,6 +12,12 @@ namespace fletch {
 PrintInterceptor* Print::interceptor_ = NULL;
 
 void Print::Out(const char* format, ...) {
+#ifdef FLETCH_BAREMETAL
+  va_list args;
+  va_start(args, format);
+  vfprintf(stdout, format, args);
+  va_end(args);
+#else
   va_list args;
   va_start(args, format);
   int size = vsnprintf(NULL, 0, format, args);
@@ -22,9 +31,16 @@ void Print::Out(const char* format, ...) {
   fflush(stdout);
   if (interceptor_) interceptor_->Out(message);
   free(message);
+#endif
 }
 
 void Print::Error(const char* format, ...) {
+#ifdef FLETCH_BAREMETAL
+  va_list args;
+  va_start(args, format);
+  vfprintf(stderr, format, args);
+  va_end(args);
+#else
   va_list args;
   va_start(args, format);
   int size = vsnprintf(NULL, 0, format, args);
@@ -38,6 +54,7 @@ void Print::Error(const char* format, ...) {
   fflush(stderr);
   if (interceptor_) interceptor_->Error(message);
   free(message);
+#endif
 }
 
 uint32 Utils::StringHash(const uint16* data, int length) {

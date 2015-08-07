@@ -237,6 +237,7 @@ uint8* StackWalker::ComputeCatchBlock(Process* process, int* stack_delta) {
 }
 
 void StackWalker::PushFrameOnSessionStack(Session* session, bool isFirstFrame) {
+#if 0
   uint8* start_bcp = function()->bytecode_address_for(0);
   int bytecode_offset = return_address() - start_bcp;
   // The first byte-code offset is not a return address but the offset for
@@ -248,6 +249,8 @@ void StackWalker::PushFrameOnSessionStack(Session* session, bool isFirstFrame) {
   }
   session->PushNewInteger(bytecode_offset);
   session->PushFunction(function());
+#endif
+  UNIMPLEMENTED();
 }
 
 int StackWalker::ComputeStackTrace(Process* process,

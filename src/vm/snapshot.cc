@@ -13,6 +13,7 @@
 #include "src/vm/object.h"
 #include "src/vm/program.h"
 
+
 namespace fletch {
 
 static const int kSupportedSizeOfDouble = 8;
@@ -276,7 +277,6 @@ void SnapshotWriter::WriteHeader(InstanceFormat::Type type, int elements) {
 Program* SnapshotReader::ReadProgram() {
   if (ReadByte() != 0xbe) FATAL("Snapshot has wrong magic header!\n");
   if (ReadByte() != 0xef) FATAL("Snapshot has wrong magic header!\n");
-
   // Read the required backward reference table size.
   int references = 0;
   for (int i = 0; i < kReferenceTableSizeBytes; i++) {

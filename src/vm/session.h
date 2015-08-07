@@ -9,6 +9,7 @@
 
 #include "src/vm/object_list.h"
 #include "src/vm/program.h"
+#include "src/vm/scheduler.h"
 
 namespace fletch {
 
@@ -16,7 +17,7 @@ class Connection;
 class ObjectMap;
 class PointerVisitor;
 
-class Session {
+class Session : public ProcessEventHandler, public ProgramHeapExtension {
  public:
   explicit Session(Connection* connection);
   virtual ~Session();
@@ -105,6 +106,8 @@ class Session {
   bool BreakPoint(Process* process);
   bool ProcessTerminated(Process* process);
   bool CompileTimeError(Process* process);
+
+  static void PrepareProgramForRunning(Program* program);
 
  private:
   enum Change {

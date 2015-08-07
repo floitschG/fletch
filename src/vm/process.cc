@@ -19,6 +19,7 @@
 #include "src/vm/process_queue.h"
 #include "src/vm/session.h"
 #include "src/vm/stack_walker.h"
+#include "src/vm/debug_info.h"
 
 namespace fletch {
 
@@ -586,9 +587,9 @@ void Process::Profile() {
   stack_limit_.compare_exchange_strong(stack_limit, kProfileMarker);
 }
 
-void Process::AttachDebugger() {
+void Process::AttachDebugger(DebugInfo* debug_info) {
   ASSERT(debug_info_ == NULL);
-  debug_info_ = new DebugInfo();
+  debug_info_ = debug_info;
 }
 
 int Process::PrepareStepOver() {

@@ -4,12 +4,13 @@
 
 #include "src/vm/natives.h"
 
-#include <dlfcn.h>
 #include <errno.h>
 #include <math.h>
 #include <stdlib.h>
+#ifndef FLETCH_BAREMETAL
 #include <sys/time.h>
 #include <unistd.h>
+#endif
 
 #include "src/shared/bytecodes.h"
 #include "src/shared/flags.h"
@@ -65,9 +66,18 @@ NATIVE(IntParse) {
   if (!y->IsSmi()) return Failure::wrong_argument_type();
   Smi* radix = Smi::cast(y);
   char* chars = str->ToCString();
+#ifdef FLETCH_BAREMETAL
+  // TODO(lk): Use strtoll once available.
+  if (radix->value() != 10) {
+    UNIMPLEMENTED();
+  }
+  int64 result = atol(chars);
+  bool error = false;
+#else
   char* end = chars;
   int64 result = strtoll(chars, &end, radix->value());
   bool error = (end != chars + str->length()) || (errno == ERANGE);
+#endif
   free(chars);
   if (error) return Failure::index_out_of_bounds();
   return process->ToInteger(result);
@@ -453,11 +463,16 @@ NATIVE(DoubleMul) {
 }
 
 NATIVE(DoubleMod) {
+#ifdef FLETCH_BAREMETAL
+  UNIMPLEMENTED();
+  return NULL;
+#else
   Double* x = Double::cast(arguments[0]);
   Object* y = arguments[1];
   if (!y->IsDouble()) return Failure::wrong_argument_type();
   double y_value = Double::cast(y)->value();
   return process->NewDouble(fmod(x->value(), y_value));
+#endif
 }
 
 NATIVE(DoubleDiv) {
@@ -469,12 +484,17 @@ NATIVE(DoubleDiv) {
 }
 
 NATIVE(DoubleTruncDiv) {
+#ifdef FLETCH_BAREMETAL
+  UNIMPLEMENTED();
+  return NULL;
+#else
   Double* x = Double::cast(arguments[0]);
   Object* y = arguments[1];
   if (!y->IsDouble()) return Failure::wrong_argument_type();
   double y_value = Double::cast(y)->value();
   if (y_value == 0) return Failure::index_out_of_bounds();
   return process->NewInteger(static_cast<int64>(x->value() / y_value));
+#endif
 }
 
 NATIVE(DoubleEqual) {
@@ -518,72 +538,132 @@ NATIVE(DoubleGreaterEqual) {
 }
 
 NATIVE(DoubleIsNaN) {
+#ifdef FLETCH_BAREMETAL
+  UNIMPLEMENTED();
+  return NULL;
+#else
   double d = Double::cast(arguments[0])->value();
   return ToBool(process, isnan(d));
+#endif
 }
 
 NATIVE(DoubleIsNegative) {
+#ifdef FLETCH_BAREMETAL
+  UNIMPLEMENTED();
+  return NULL;
+#else
   double d = Double::cast(arguments[0])->value();
   return ToBool(process, (signbit(d) != 0) && !isnan(d));
+#endif
 }
 
 NATIVE(DoubleCeil) {
+#ifdef FLETCH_BAREMETAL
+  UNIMPLEMENTED();
+  return NULL;
+#else
   double value = Double::cast(arguments[0])->value();
   if (isnan(value) || isinf(value)) return Failure::index_out_of_bounds();
   return process->ToInteger(static_cast<int64>(ceil(value)));
+#endif
 }
 
 NATIVE(DoubleCeilToDouble) {
+#ifdef FLETCH_BAREMETAL
+  UNIMPLEMENTED();
+  return NULL;
+#else
   Double* x = Double::cast(arguments[0]);
   return process->NewDouble(ceil(x->value()));
+#endif
 }
 
 NATIVE(DoubleRound) {
+#ifdef FLETCH_BAREMETAL
+  UNIMPLEMENTED();
+  return NULL;
+#else
   double value = Double::cast(arguments[0])->value();
   if (isnan(value) || isinf(value)) return Failure::index_out_of_bounds();
   return process->ToInteger(static_cast<int64>(round(value)));
+#endif
 }
 
 NATIVE(DoubleRoundToDouble) {
+#ifdef FLETCH_BAREMETAL
+  UNIMPLEMENTED();
+  return NULL;
+#else
   Double* x = Double::cast(arguments[0]);
   return process->NewDouble(round(x->value()));
+#endif
 }
 
 NATIVE(DoubleFloor) {
+#ifdef FLETCH_BAREMETAL
+  UNIMPLEMENTED();
+  return NULL;
+#else
   double value = Double::cast(arguments[0])->value();
   if (isnan(value) || isinf(value)) return Failure::index_out_of_bounds();
   return process->ToInteger(static_cast<int64>(floor(value)));
+#endif
 }
 
 NATIVE(DoubleFloorToDouble) {
+#ifdef FLETCH_BAREMETAL
+  UNIMPLEMENTED();
+  return NULL;
+#else
   Double* x = Double::cast(arguments[0]);
   return process->NewDouble(floor(x->value()));
+#endif
 }
 
 NATIVE(DoubleTruncate) {
+#ifdef FLETCH_BAREMETAL
+  UNIMPLEMENTED();
+  return NULL;
+#else
   double value = Double::cast(arguments[0])->value();
   if (isnan(value) || isinf(value)) return Failure::index_out_of_bounds();
   return process->ToInteger(static_cast<int64>(trunc(value)));
+#endif
 }
 
 NATIVE(DoubleTruncateToDouble) {
+#ifdef FLETCH_BAREMETAL
+  UNIMPLEMENTED();
+  return NULL;
+#else
   Double* x = Double::cast(arguments[0]);
   return process->NewDouble(trunc(x->value()));
+#endif
 }
 
 NATIVE(DoubleRemainder) {
+#ifdef FLETCH_BAREMETAL
+  UNIMPLEMENTED();
+  return NULL;
+#else
   if (!arguments[1]->IsDouble()) return Failure::wrong_argument_type();
   Double* x = Double::cast(arguments[0]);
   Double* y = Double::cast(arguments[1]);
   return process->NewDouble(fmod(x->value(), y->value()));
+#endif
 }
 
 NATIVE(DoubleToInt) {
+#ifdef FLETCH_BAREMETAL
+  UNIMPLEMENTED();
+  return NULL;
+#else
   double d = Double::cast(arguments[0])->value();
   if (isinf(d) || isnan(d)) return Failure::index_out_of_bounds();
   // TODO(ager): Handle large doubles that are out of int64 range.
   int64 result = static_cast<int64>(trunc(d));
   return process->ToInteger(result);
+#endif
 }
 
 NATIVE(DoubleToString) {
@@ -727,6 +807,13 @@ NATIVE(DoubleParse) {
   return process->NewDouble(result);
 }
 
+#ifdef FLETCH_BAREMETAL
+#define DOUBLE_MATH_NATIVE(name, method)                        \
+  NATIVE(name) {                                                \
+  UNIMPLEMENTED();                                              \
+  return NULL;                                                  \
+  }
+#else
 #define DOUBLE_MATH_NATIVE(name, method)                        \
   NATIVE(name) {                                                \
     Object* x = arguments[0];                                   \
@@ -734,6 +821,7 @@ NATIVE(DoubleParse) {
     double d = Double::cast(x)->value();                        \
     return process->NewDouble(method(d));                       \
   }
+#endif
 
 DOUBLE_MATH_NATIVE(DoubleSin, sin)
 DOUBLE_MATH_NATIVE(DoubleCos, cos)
@@ -746,6 +834,10 @@ DOUBLE_MATH_NATIVE(DoubleExp, exp)
 DOUBLE_MATH_NATIVE(DoubleLog, log)
 
 NATIVE(DoubleAtan2) {
+#ifdef FLETCH_BAREMETAL
+  UNIMPLEMENTED();
+  return NULL;
+#else
   Object* x = arguments[0];
   if (!x->IsDouble()) return Failure::wrong_argument_type();
   Object* y = arguments[1];
@@ -753,6 +845,7 @@ NATIVE(DoubleAtan2) {
   double x_value = Double::cast(x)->value();
   double y_value = Double::cast(y)->value();
   return process->NewDouble(atan2(x_value, y_value));
+#endif
 }
 
 NATIVE(DoublePow) {
@@ -1044,8 +1137,13 @@ NATIVE(IdentityHashCode) {
   } else if (object->IsSmi() || object->IsLargeInteger()) {
     return object;
   } else if (object->IsDouble()) {
+#ifdef FLETCH_BAREMETAL
+  UNIMPLEMENTED();
+  return NULL;
+#else
     double value = Double::cast(object)->value();
     return process->ToInteger(static_cast<int64>(value));
+#endif
   } else {
     return ComplexHeapObject::cast(object)->LazyIdentityHashCode(
         process->random());
@@ -1202,6 +1300,10 @@ NATIVE(DateTimeLocalTimeZoneOffset) {
 }
 
 NATIVE(UriBase) {
+#ifdef FLETCH_BAREMETAL
+  UNIMPLEMENTED();
+  return NULL;
+#else
   char* buffer = reinterpret_cast<char*>(malloc(PATH_MAX + 1));
   char* path = getcwd(buffer, PATH_MAX);
   Object* result = Failure::index_out_of_bounds();
@@ -1213,6 +1315,7 @@ NATIVE(UriBase) {
   }
   free(buffer);
   return result;
+#endif
 }
 
 NATIVE(SystemGetEventHandler) {
