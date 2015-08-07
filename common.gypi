@@ -19,7 +19,7 @@
     'common_gcc_cflags_c': [
       '-fdata-sections',
       '-ffunction-sections',
-      '-fPIC',
+      #'-fPIC',
     ],
 
     'common_gcc_cflags_cc': [
@@ -125,13 +125,13 @@
 
         'xcode_settings': { # And ninja.
           'OTHER_CPLUSPLUSFLAGS' : [
-            '-O3',
+            '-Os',
             '-fomit-frame-pointer',
           ],
         },
 
         'cflags': [
-          '-O3',
+          '-Os',
           '-fomit-frame-pointer',
         ],
       },
