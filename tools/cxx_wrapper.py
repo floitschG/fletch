@@ -49,7 +49,7 @@ def invoke_gcc_lkarm(args):
   args.append("-mcpu=cortex-m4");
   #args.append("-mfloat-abi=hard");
   args.append("-include");
-  args.append(os.environ["LK_BASE"] + "/build-stm32746g-eval2-test/config.h");
+  args.append("../../../third_party/lk/build-stm32746g-eval2-test/config.h");
   subprocess.check_call([path] + args)
 
 def main():

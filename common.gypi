@@ -8,6 +8,8 @@
   'variables': {
     'clang%': '0',
 
+    'lk_path': '<(DEPTH)/../third_party/lk/',
+
     'common_gcc_warning_flags': [
       '-Wall',
       '-Wextra', # Also known as -W.
@@ -459,22 +461,22 @@
               ],
 
               'defines!': [
-                'FLETCH_TARGET_OS_LINUX', 
+                'FLETCH_TARGET_OS_LINUX',
                 'FLETCH_TARGET_OS_POSIX',
               ],
- 
+
               'defines': [
                 'FLETCH_TARGET_OS_LK',
                 'FLETCH_BAREMETAL',
               ],
 
-              'include_dirs': [ 
-                '<!(echo "$LK_BASE/include")',
-                '<!(echo "$LK_BASE/lib/lwip/include")',
-                '<!(echo "$LK_BASE/lib/lwip/include/ipv4")',
-                '<!(echo "$LK_BASE/lib/libm/include")',
-                '<!(echo "$LK_BASE/arch/arm/include")',
-                '<!(echo "$LK_BASE/arch/arm/arm/include")',
+              'include_dirs': [
+                '<(lk_path)/include',
+                '<(lk_path)/lib/lwip/include',
+                '<(lk_path)/lib/lwip/include/ipv4',
+                '<(lk_path)/lib/libm/include',
+                '<(lk_path)/arch/arm/include',
+                '<(lk_path)/arch/arm/arm/include',
               ],
 
               'ldflags': [

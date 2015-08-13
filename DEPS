@@ -41,6 +41,8 @@ vars = {
   # against infra to make that happen.
   "github_mirror":
       "https://chromium.googlesource.com/external/github.com/dart-lang/%s.git",
+
+  "lk_tag": "@7e9782322b5336c78b16159ce31698341485ee8b",
 }
 
 deps = {
@@ -62,6 +64,9 @@ deps = {
 
   "third_party/persistent":
       (Var("github_url") % "polux/persistent") + Var("persistent_rev"),
+
+  "third_party/lk":
+      (Var("github_url") % "herhut-ggl/lk") + Var("lk_tag"),
 }
 
 # To include Mac deps on other OSes, add this to your .gclient file:
