@@ -8,6 +8,7 @@ import os
 import sys
 import utils
 import subprocess
+import re
 
 
 def invoke_clang(args):
@@ -42,13 +43,19 @@ def invoke_gcc_arm64(args):
 
 def invoke_gcc_lkarm(args):
   path = "/usr/bin/arm-none-eabi-gcc"
+  lkconfig = "../../../third_party/lk/build-" + os.environ["LK_PROJECT"] + \
+             "/config.h";
+  lkconfig_contents = open(lkconfig).read();
+  target_arch_desc = re.search("ARM_CPU_CORTEX_([AM]\d)", lkconfig_contents);
+  target_kind = target_arch_desc.group(1);
+  gcc_cpu = "cortex-" + target_kind.lower();
   args.append("-std=c99");
   args.append("-mthumb");
   args.append("-mthumb-interwork");
-  args.append("-mcpu=cortex-m4");
+  args.append("-mcpu=" + gcc_cpu);
   #args.append("-mfloat-abi=hard");
   args.append("-include");
-  args.append("../../../third_party/lk/build-stm32746g-eval2-test/config.h");
+  args.append(lkconfig);
   subprocess.check_call([path] + args)
 
 def main():
