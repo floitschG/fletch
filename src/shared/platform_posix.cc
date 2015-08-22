@@ -18,6 +18,13 @@
 
 #include "src/shared/utils.h"
 
+#ifdef __pnacl__
+#ifndef MAP_NORESERVE
+// PNaCL doesn't have this, so we always grab all of the memory, which is bad.
+#define MAP_NORESERVE 0
+#endif
+#endif
+
 namespace fletch {
 
 static uint64 time_launch;
@@ -101,26 +108,36 @@ bool Platform::StoreFile(const char* uri, List<uint8> bytes) {
   return true;
 }
 
+#ifndef __pnacl__
 static bool LocalTime(int64_t seconds_since_epoch, tm* tm_result) {
   time_t seconds = static_cast<time_t>(seconds_since_epoch);
   if (seconds != seconds_since_epoch) return false;
   struct tm* error_code = localtime_r(&seconds, tm_result);
   return error_code != NULL;
 }
+#endif
 
 const char* Platform::GetTimeZoneName(int64_t seconds_since_epoch) {
+#ifdef __pnacl__
+  return "";
+#else
   tm decomposed;
-  bool succeeded = LocalTime(seconds_since_epoch, &decomposed);
   // If unsuccessful, return an empty string like V8 does.
+  bool succeeded = LocalTime(seconds_since_epoch, &decomposed);
   return (succeeded && (decomposed.tm_zone != NULL)) ? decomposed.tm_zone : "";
+#endif
 }
 
 int Platform::GetTimeZoneOffset(int64_t seconds_since_epoch) {
+#ifdef __pnacl__
+  return 0;
+#else
   tm decomposed;
   bool succeeded = LocalTime(seconds_since_epoch, &decomposed);
   // Even if the offset was 24 hours it would still easily fit into 32 bits.
   // If unsuccessful, return zero like V8 does.
   return succeeded ? static_cast<int>(decomposed.tm_gmtoff) : 0;
+#endif
 }
 
 // Constants used for mmap.

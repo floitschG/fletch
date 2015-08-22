@@ -107,19 +107,55 @@ class Atomic {
   }
 
   T add_fetch(T other, MemoryOrder order = kSeqCst) {
+#ifdef __pnacl__
+    T old_value = value_;
+    T new_value;
+    do {
+      new_value = old_value + other;
+    } while (!compare_exchange_weak(old_value, new_value));
+    return new_value;
+#else
     return __atomic_add_fetch(&value_, other, order);
+#endif
   }
 
   T sub_fetch(T other, MemoryOrder order = kSeqCst) {
+#ifdef __pnacl__
+    T old_value = value_;
+    T new_value;
+    do {
+      new_value = old_value - other;
+    } while (!compare_exchange_weak(old_value, new_value));
+    return new_value;
+#else
     return __atomic_sub_fetch(&value_, other, order);
+#endif
   }
 
   T fetch_add(T other, MemoryOrder order = kSeqCst) {
+#ifdef __pnacl__
+    T old_value = value_;
+    T new_value;
+    do {
+      new_value = old_value + other;
+    } while (!compare_exchange_weak(old_value, new_value));
+    return old_value;
+#else
     return __atomic_fetch_add(&value_, other, order);
+#endif
   }
 
   T fetch_sub(T other, MemoryOrder order = kSeqCst) {
+#ifdef __pnacl__
+    T old_value = value_;
+    T new_value;
+    do {
+      new_value = old_value - other;
+    } while (!compare_exchange_weak(old_value, new_value));
+    return old_value;
+#else
     return __atomic_fetch_sub(&value_, other, order);
+#endif
   }
 
  private:

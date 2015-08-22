@@ -15,13 +15,13 @@
         'src/vm/vm.gyp:fletch-vm',
       ],
     },
-    {
-      'target_name': 'c_test_library',
-      'type': 'none',
-      'dependencies': [
-        'src/vm/vm.gyp:ffi_test_library',
-      ],
-    },
+#    {
+#      'target_name': 'c_test_library',
+#      'type': 'none',
+#      'dependencies': [
+#        'src/vm/vm.gyp:ffi_test_library',
+#      ],
+#    },
     {
       'target_name': 'natives_json',
       'type': 'none',

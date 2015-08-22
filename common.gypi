@@ -506,6 +506,70 @@
         ],
       },
 
+      'fletch_nacl': {
+        'abstract': 1,
+
+        'inherit_from': ['fletch_disable_live_coding', 'fletch_disable_ffi'],
+
+        'defines': [
+          'FLETCH32',
+          'FLETCH_TARGET_NACL',
+        ],
+
+        'xcode_settings': { # And ninja.
+          'OTHER_CPLUSPLUSFLAGS': [
+            '-g',
+          ],
+        },
+
+        'cflags': [
+          '-g',
+        ],
+
+        'target_conditions': [
+          ['_toolset=="target"', {
+              'conditions': [
+                ['OS=="linux"', {
+                  'defines': [
+                    # Fake define intercepted by cc_wrapper.py to change the
+                    # compiler binary to a nacl cross compiler. This is only
+                    # needed on linux.
+                    'FLETCH_NACL',
+                  ],
+                }]
+              ],
+
+              'defines!': [
+                'FLETCH_TARGET_OS_LINUX',
+              ],
+
+              'defines': [
+                'FLETCH_TARGET_OS_POSIX',
+              ],
+
+              'include_dirs': [
+                # eg: '<(nacl_path)/include',
+              ],
+
+              'ldflags': [
+                # Fake define intercepted by cc_wraper.py.
+                '-L/FLETCH_NACL',
+              ],
+            },
+          ],
+
+          ['_toolset=="host"', {
+              # Compile host targets as IA32, to get same word size.
+              # TODO(floitsch): not sure that's true or a problem.
+              'inherit_from': [ 'fletch_ia32' ],
+
+              # Undefine IA32 target.
+              'defines!': [ 'FLETCH_TARGET_IA32' ],
+            },
+          ]
+        ],
+      },
+
       'ReleaseIA32': {
         'inherit_from': [ 'fletch_base', 'fletch_release', 'fletch_ia32' ],
       },
@@ -537,6 +601,10 @@
           'fletch_base', 'fletch_release', 'fletch_ia32', 'fletch_asan',
           'fletch_clang',
         ],
+      },
+
+      'ReleaseNacl': {
+        'inherit_from': [ 'fletch_base', 'fletch_release', 'fletch_nacl' ]
       },
 
       'ReleaseX64Clang': {
@@ -630,6 +698,10 @@
 
       'DebugXARM64': {
         'inherit_from': [ 'fletch_base', 'fletch_debug', 'fletch_xarm64' ],
+      },
+
+      'DebugNacl': {
+        'inherit_from': [ 'fletch_base', 'fletch_debug', 'fletch_nacl' ]
       },
 
       'DevelopIA32': {

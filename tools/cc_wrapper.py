@@ -41,6 +41,10 @@ def invoke_gcc_lk(args):
   args.insert(0, "arm-none-eabi-gcc")
   os.execv("/usr/bin/arm-none-eabi-gcc", args)
 
+def invoke_pnacl_clang(args):
+  args.insert(0, "pnacl-clang")
+  os.execv("/usr/local/google/home/floitsch/NOSAVE/playground/nacl_sdk/pepper_45/toolchain/linux_pnacl/bin/pnacl-clang", args)
+
 def main():
   args = sys.argv[1:]
   if "-L/FLETCH_ASAN" in args:
@@ -68,6 +72,11 @@ def main():
   elif "-L/FLETCH_LK" in args:
     args.remove("-L/FLETCH_LK")
     invoke_gcc_lk(args)
+  elif "-DFLETCH_NACL" in args:
+    invoke_pnacl_clang(args)
+  elif "-L/FLETCH_NACL" in args:
+    args.remove("-L/FLETCH_NACL")
+    invoke_pnacl_clang(args)
   else:
     invoke_gcc(args)
 
