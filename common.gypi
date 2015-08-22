@@ -272,6 +272,10 @@
               '-fno-strict-overflow',
             ],
 
+            'cflags': [
+              '-fno-strict-overflow',
+            ],
+
             'conditions': [
               ['OS=="linux"', {
                 'defines': [

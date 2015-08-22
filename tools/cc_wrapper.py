@@ -43,7 +43,7 @@ def invoke_gcc_lk(args):
 
 def invoke_gcc_mips(args):
   args.insert(0, "-DNEED_PRINTF")
-  args.insert(0, "mips-openwrt-linux-musl-gcc")
+  args.insert(0, "/tmp/toolchain-mips_34kc_gcc-5.1.0_musl-1.1.9/bin/mips-openwrt-linux-musl-gcc")
   os.execv("/tmp/toolchain-mips_34kc_gcc-5.1.0_musl-1.1.9/bin/mips-openwrt-linux-musl-gcc", args)
 
 def main():
