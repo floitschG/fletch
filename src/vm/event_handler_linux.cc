@@ -2,7 +2,7 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE.md file.
 
-#if defined(FLETCH_TARGET_OS_LINUX)
+#if defined(FLETCH_TARGET_OS_LINUX) || defined(__pnacl__)
 
 #include "src/vm/event_handler.h"
 
