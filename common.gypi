@@ -258,6 +258,71 @@
         },
       },
 
+      'fletch_xmips': {
+        'abstract': 1,
+
+        'defines': [
+          'FLETCH32',
+          'FLETCH_TARGET_MIPS',
+        ],
+
+        'target_conditions': [
+          ['_toolset=="target"', {
+            'cflags': [
+              '-fno-strict-overflow',
+            ],
+
+            'conditions': [
+              ['OS=="linux"', {
+                'defines': [
+                  # Fake define intercepted by cc_wrapper.py to change the
+                  # compiler binary to an ARM cross compiler. This is only
+                  # needed on linux.
+                  'FLETCH_MIPS',
+                 ],
+               }],
+              ['OS=="mac"', {
+                'xcode_settings': { # And ninja.
+                  'ARCHS': [ 'mips' ],
+
+                  'LIBRARY_SEARCH_PATHS': [
+                    '<(third_party_libs_path)/mips',
+                  ],
+
+                  'OTHER_CPLUSPLUSFLAGS' : [
+                    '-isysroot',
+                    '<(ios_sdk_path)',
+                  ],
+
+                  'OTHER_CFLAGS' : [
+                    '-isysroot',
+                    '<(ios_sdk_path)',
+                  ],
+                },
+               }]
+            ],
+
+            'ldflags': [
+              '-L<(third_party_libs_path)/mips',
+              # Fake define intercepted by cc_wrapper.py.
+              '-L/FLETCH_MIPS',
+              '-static-libstdc++',
+            ],
+          }],
+
+          ['_toolset=="host"', {
+            # Compile host targets as IA32, to get same word size.
+            'inherit_from': [ 'fletch_ia32' ],
+
+            # The 'fletch_ia32' target will define IA32 as the target. Since
+            # the host should still target MIPS, undefine it.
+            'defines!': [
+              'FLETCH_TARGET_IA32',
+            ],
+          }],
+        ],
+      },
+
       'fletch_xarm': {
         'abstract': 1,
 
@@ -556,6 +621,10 @@
         'inherit_from': [ 'fletch_base', 'fletch_release', 'fletch_arm' ],
       },
 
+      'ReleaseXMIPS': {
+        'inherit_from': [ 'fletch_base', 'fletch_release', 'fletch_xmips' ],
+      },
+
       'ReleaseXARM': {
         'inherit_from': [ 'fletch_base', 'fletch_release', 'fletch_xarm' ],
       },
@@ -617,6 +686,10 @@
 
       'DebugARM': {
         'inherit_from': [ 'fletch_base', 'fletch_debug', 'fletch_arm' ],
+      },
+
+      'DebugXMIPS': {
+        'inherit_from': [ 'fletch_base', 'fletch_debug', 'fletch_xmips' ],
       },
 
       'DebugXARM': {

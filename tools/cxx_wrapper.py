@@ -41,6 +41,11 @@ def invoke_gcc_lk(args):
   args.insert(0, "arm-none-eabi-g++")
   os.execv("/usr/bin/arm-none-eabi-g++", args)
 
+def invoke_gcc_mips(args):
+  args.insert(0, "-DNEED_PRINTF")
+  args.insert(0, "/tmp/toolchain-mips_34kc_gcc-5.1.0_musl-1.1.9/bin/mips-openwrt-linux-musl-g++")
+  os.execv("/tmp/toolchain-mips_34kc_gcc-5.1.0_musl-1.1.9/bin/mips-openwrt-linux-musl-g++", args)
+
 def main():
   args = sys.argv[1:]
   if "-L/FLETCH_ASAN" in args:
@@ -68,6 +73,11 @@ def main():
   elif "-L/FLETCH_LK" in args:
     args.remove("-L/FLETCH_LK")
     invoke_gcc_lk(args)
+  elif "-DFLETCH_MIPS" in args:
+    invoke_gcc_mips(args)
+  elif "-L/FLETCH_MIPS" in args:
+    args.remove("-L/FLETCH_MIPS")
+    invoke_gcc_mips(args)
   else:
     invoke_gcc(args)
 
