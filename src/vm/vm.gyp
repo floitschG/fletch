@@ -216,12 +216,11 @@
     },
     {
       'target_name': 'fletch-nacl-all',
-      'toolsets': ['target', 'host'],
+      'toolsets': ['target'],
       'type': 'executable',
-      'dependencies': [
-        '../double_conversion.gyp:double_conversion',
-      ],
       'sources': [
+        'nacl.cc',
+
         'debug_info.cc',
         'event_handler.cc',
         'event_handler_macos.cc',
@@ -261,7 +260,6 @@
         'thread_posix.cc',
         'unicode.cc',
         'weak_pointer.cc',
-        'nacl.cc',
 
         '../shared/assert.cc',
         '../shared/bytecodes.cc',

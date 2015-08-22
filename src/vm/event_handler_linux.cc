@@ -6,7 +6,11 @@
 
 #include "src/vm/event_handler.h"
 
+#if defined(__pnacl__)
+#include <pnacl/sys/poll.h>
+#else
 #include <sys/epoll.h>
+#endif
 #include <sys/types.h>
 #include <unistd.h>
 
