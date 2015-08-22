@@ -549,7 +549,6 @@
               ],
 
               'include_dirs': [
-                '/usr/local/google/home/floitsch/NOSAVE/playground/nacl_sdk/pepper_45/include'
                 # eg: '<(nacl_path)/include',
               ],
 
