@@ -514,6 +514,7 @@
         'defines': [
           'FLETCH32',
           'FLETCH_TARGET_NACL',
+          'FLETCH_TARGET_OS_LINUX',
         ],
 
         'xcode_settings': { # And ninja.
