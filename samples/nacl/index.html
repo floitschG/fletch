@@ -16,14 +16,20 @@
 var fletchModule = null;  // The global fletch module (instantiated below).
 
 function moduleDidLoad() {
-  console.log("loaded");
+  console.log("loaded nacl module");
   fletchModule = document.getElementById('fletch');
-  // TODO(floitsch): get a snapshot from somewhere.
-  var array = new Uint8Array(5);
-  for (var i = 0;  i < array.length; i++) {
-    array[i] = i*i;
-  }
-  fletchModule.postMessage(array.buffer);
+
+  var request = new XMLHttpRequest();
+  request.open("GET", "hello.snapshot", true);
+  request.responseType = "arraybuffer";
+  request.onload = function(event) {
+    var arrayBuffer = request.response;
+    if (arrayBuffer) {
+      console.log("sending snapshot to fletch");
+      fletchModule.postMessage(arrayBuffer);
+    }
+  };
+  request.send(null);
 }
 
 function handleMessage(message_event) {

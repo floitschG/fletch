@@ -28,7 +28,7 @@ class FletchInstance : public pp::Instance {
   /// For Fletch we expect a byte-buffer. The module will crash for anything
   /// else.
   virtual void HandleMessage(const pp::Var& var_message) {
-    printf("received message");
+    printf("received message\n");
     FletchSetup();
     pp::VarArrayBuffer::VarArrayBuffer buffer(var_message);
     uint32_t length = buffer.ByteLength();
