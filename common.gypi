@@ -33,6 +33,7 @@
     'LK_CPU%': 'cortex-a9',
 
     'lk_location': '../../../third_party/lk',
+    'nacl_path': '/usr/local/google/home/floitsch/NOSAVE/playground/nacl_sdk/pepper_45/',
 
     'conditions': [
       [ 'OS=="linux"', {
@@ -549,12 +550,13 @@
               ],
 
               'include_dirs': [
-                # eg: '<(nacl_path)/include',
+                '<(nacl_path)/include',
               ],
 
               'ldflags': [
                 # Fake define intercepted by cc_wraper.py.
                 '-L/FLETCH_NACL',
+                '-L<(nacl_path)/lib/pnacl/Release',
               ],
             },
           ],

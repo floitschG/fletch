@@ -295,6 +295,8 @@
           #'-ldl',
           # TODO(ahe): Not sure this option works as intended on Mac.
           '-rdynamic',
+          '-lppapi_cpp',
+          '-lppapi',
         ],
       },
     },
