@@ -63,6 +63,9 @@ import '../src/fletch_backend.dart' show
 import '../src/fletch_class_builder.dart' show
     FletchClassBuilder;
 
+import '../src/fletch_context.dart' show
+    FletchContext;
+
 import '../commands.dart' show
     Command,
     MapId;
@@ -762,6 +765,11 @@ class LibraryUpdater extends FletchFeatures {
         isTokenBetween(diffToken, after.beginToken, last)) {
       removeFunction(before);
       addFunction(after, before.enclosingElement);
+      if (compiler.mainFunction == before) {
+        return cannotReuse(
+            after,
+            "Unable to handle when signature of '${after.name}' changes");
+      }
       return true;
     }
     logVerbose('Simple modification of ${after} detected');
@@ -788,6 +796,8 @@ class LibraryUpdater extends FletchFeatures {
         // TODO(ahe): Quadratic.
         invalidateScopesAffectedBy(member, before);
       });
+    } else {
+      logVerbose('Simple modification of ${after} detected');
     }
     return canReuseScopeContainerElement(before, after);
   }
@@ -863,6 +873,10 @@ class LibraryUpdater extends FletchFeatures {
   }
 
   FletchDelta computeUpdateFletch(FletchSystem currentSystem) {
+    // TODO(ahe): Remove this when we support adding static fields.
+    Set<Element> existingStaticFields =
+        new Set<Element>.from(fletchContext.staticIndices.keys);
+
     backend.newSystemBuilder(currentSystem);
 
     List<Element> updatedElements = applyUpdates();
@@ -899,6 +913,15 @@ class LibraryUpdater extends FletchFeatures {
       }
     }
     compiler.processQueue(enqueuer.codegen, null);
+
+    // TODO(ahe): Remove this when we support adding static fields.
+    Set<Element> newStaticFields =
+        new Set<Element>.from(fletchContext.staticIndices.keys).difference(
+            existingStaticFields);
+    if (!newStaticFields.isEmpty) {
+      throw new IncrementalCompilationFailed(
+          "Unable to add static fields:\n  ${newStaticFields.join(',\n  ')}");
+    }
 
     // Run through all compiled methods and see if they may apply to
     // newlySeenSelectors.
@@ -1320,6 +1343,8 @@ abstract class FletchFeatures {
   FletchBackend get backend => compiler.backend;
 
   EnqueueTask get enqueuer => compiler.enqueuer;
+
+  FletchContext get fletchContext => backend.context;
 
   FletchFunctionBuilder lookupFletchFunctionBuilder(FunctionElement function) {
     return backend.systemBuilder.lookupFunctionBuilderByElement(function);
