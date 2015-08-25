@@ -691,6 +691,10 @@
         'inherit_from': [ 'fletch_base', 'fletch_release', 'fletch_nacl' ]
       },
 
+      'ReleaseEmscripten': {
+        'inherit_from': [ 'fletch_base', 'fletch_release', 'fletch_emscripten' ]
+      },
+
       'ReleaseX64Clang': {
         'inherit_from': [
           'fletch_base', 'fletch_release', 'fletch_x64', 'fletch_clang',
@@ -786,6 +790,10 @@
 
       'DebugNacl': {
         'inherit_from': [ 'fletch_base', 'fletch_debug', 'fletch_nacl' ]
+      },
+
+      'DebugEmscripten': {
+        'inherit_from': [ 'fletch_base', 'fletch_debug', 'fletch_emscripten' ]
       },
 
       'DevelopIA32': {
