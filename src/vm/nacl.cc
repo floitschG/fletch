@@ -44,8 +44,10 @@ class FletchInstance : public pp::Instance {
         FletchSetup();
         FletchRunSnapshot(data, length);
         FletchTearDown();
+        free(data);
         return;
       }
+      free(data);
     }
 
     pp::Var var_reply("Not a Snapshot");
