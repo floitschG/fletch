@@ -47,7 +47,8 @@ def invoke_pnacl_clang(args):
 
 def invoke_emscripten(args):
   args.insert(0, "emcc")
-  os.execv("/usr/local/google/home/floitsch/NOSAVE/playground/emsdk_portable/emscripten/tag-1.34.4/emcc", args)
+#  os.execv("/usr/local/google/home/floitsch/NOSAVE/playground/emsdk_portable/emscripten/tag-1.34.4/emcc", args)
+  os.execv("/usr/local/google/home/floitsch/NOSAVE/playground/emsdk_portable/emscripten/master/emcc", args)
 
 def main():
   args = sys.argv[1:]

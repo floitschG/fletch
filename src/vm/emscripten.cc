@@ -2,32 +2,20 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE.md file.
 
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
 
 #include "include/fletch_api.h"
 
-namespace fletch {
-
-static bool IsSnapshot(uint8_t* snapshot, uint32_t length) {
-  return length > 2 && snapshot[0] == 0xbe && snapshot[1] == 0xef;
-}
-
-static int Main(int argc, char** argv) {
-  printf("running main\n");
-  uint8_t* bytes = static_cast<uint8_t*>(malloc(512));
+extern "C" {
+int RunSnapshotFromEmscripten(uint8_t* data, int length) {
+  printf("running snapshot (size %d)\n", length);
+  printf("%x %x %x %x %x\n", data[0], data[1], data[2], data[3], data[4]);
   FletchSetup();
-  FletchRunSnapshot(bytes, 512);
+  FletchRunSnapshot(data, length);
   FletchTearDown();
-  free(bytes);
   return 0;
 }
-
-}  // namespace fletch
-
-
-// Forward main calls to fletch::Main.
-int main(int argc, char** argv) {
-  return fletch::Main(argc, argv);
-}
+}  // namespace emscripten

@@ -34,7 +34,8 @@
 
     'lk_path': '<(DEPTH)/../third_party/lk',
     'nacl_path': '/usr/local/google/home/floitsch/NOSAVE/playground/nacl_sdk/pepper_45/',
-    'emscripten_path': '/usr/local/google/home/floitsch/NOSAVE/playground/emsdk_portable/emscripten/tag-1.34.4/',
+#    'emscripten_path': '/usr/local/google/home/floitsch/NOSAVE/playground/emsdk_portable/emscripten/tag-1.34.4/',
+    'emscripten_path': '/usr/local/google/home/floitsch/NOSAVE/playground/emsdk_portable/emscripten/master/',
 
     'conditions': [
       [ 'OS=="linux"', {
@@ -107,7 +108,6 @@
           '-Wno-non-virtual-dtor',
           '-Werror',
           '<@(common_gcc_cflags_cc)',
-          '-fno-rtti',
           '-fno-exceptions',
         ],
 
@@ -608,6 +608,9 @@
 
         'cflags': [
           '-g',
+          '-s USE_PTHREADS=1',
+          '-s ASSERTIONS=1',
+          '-s EXPORTED_FUNCTIONS="[\'_RunSnapshotFromEmscripten\']"',
         ],
 
         'target_conditions': [
@@ -638,6 +641,8 @@
               'ldflags': [
                 # Fake define intercepted by cc_wraper.py.
                 '-L/FLETCH_EMSCRIPTEN',
+                '-s USE_PTHREADS=1',
+                '-s EXPORTED_FUNCTIONS="[\'_RunSnapshotFromEmscripten\']"',
               ],
             },
           ],

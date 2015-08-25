@@ -297,7 +297,7 @@
       },
     },
     {
-      'target_name': 'fletch-emscripten-all',
+      'target_name': 'fletch-emscripten-all.asm.js',
       'toolsets': ['target'],
       'type': 'executable',
       'sources': [
