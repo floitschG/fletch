@@ -34,6 +34,7 @@
 
     'lk_location': '../../../third_party/lk',
     'nacl_path': '/usr/local/google/home/floitsch/NOSAVE/playground/nacl_sdk/pepper_45/',
+    'emscripten_path': '/usr/local/google/home/floitsch/NOSAVE/playground/emsdk_portable/emscripten/tag-1.34.4/',
 
     'conditions': [
       [ 'OS=="linux"', {
@@ -557,6 +558,71 @@
                 # Fake define intercepted by cc_wraper.py.
                 '-L/FLETCH_NACL',
                 '-L<(nacl_path)/lib/pnacl/Release',
+              ],
+            },
+          ],
+
+          ['_toolset=="host"', {
+              # Compile host targets as IA32, to get same word size.
+              # TODO(floitsch): not sure that's true or a problem.
+              'inherit_from': [ 'fletch_ia32' ],
+
+              # Undefine IA32 target.
+              'defines!': [ 'FLETCH_TARGET_IA32' ],
+            },
+          ]
+        ],
+      },
+
+      'fletch_emscripten': {
+        'abstract': 1,
+
+        'inherit_from': ['fletch_disable_live_coding', 'fletch_disable_ffi'],
+
+        'defines': [
+          'FLETCH32',
+          'FLETCH_TARGET_EMSCRIPTEN',
+          'FLETCH_TARGET_OS_LINUX',
+        ],
+
+        'xcode_settings': { # And ninja.
+          'OTHER_CPLUSPLUSFLAGS': [
+            '-g',
+          ],
+        },
+
+        'cflags': [
+          '-g',
+        ],
+
+        'target_conditions': [
+          ['_toolset=="target"', {
+              'conditions': [
+                ['OS=="linux"', {
+                  'defines': [
+                    # Fake define intercepted by cc_wrapper.py to change the
+                    # compiler binary to a nacl cross compiler. This is only
+                    # needed on linux.
+                    'FLETCH_EMSCRIPTEN',
+                  ],
+                }]
+              ],
+
+              'defines!': [
+                'FLETCH_TARGET_OS_LINUX',
+              ],
+
+              'defines': [
+                'FLETCH_TARGET_OS_POSIX',
+              ],
+
+              'include_dirs': [
+                '<(emscripten_path)/system/lib/libcxxabi/include',
+              ],
+
+              'ldflags': [
+                # Fake define intercepted by cc_wraper.py.
+                '-L/FLETCH_EMSCRIPTEN',
               ],
             },
           ],

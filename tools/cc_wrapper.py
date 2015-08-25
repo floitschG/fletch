@@ -45,6 +45,10 @@ def invoke_pnacl_clang(args):
   args.insert(0, "pnacl-clang")
   os.execv("/usr/local/google/home/floitsch/NOSAVE/playground/nacl_sdk/pepper_45/toolchain/linux_pnacl/bin/pnacl-clang", args)
 
+def invoke_emscripten(args):
+  args.insert(0, "emcc")
+  os.execv("/usr/local/google/home/floitsch/NOSAVE/playground/emsdk_portable/emscripten/tag-1.34.4/emcc", args)
+
 def main():
   args = sys.argv[1:]
   if "-L/FLETCH_ASAN" in args:
@@ -76,6 +80,11 @@ def main():
     invoke_pnacl_clang(args)
   elif "-L/FLETCH_NACL" in args:
     args.remove("-L/FLETCH_NACL")
+    invoke_pnacl_clang(args)
+  elif "-DFLETCH_EMSCRIPTEN" in args:
+    invoke_pnacl_clang(args)
+  elif "-L/FLETCH_EMSCRIPTEN" in args:
+    args.remove("-L/FLETCH_EMSCRIPTEN")
     invoke_pnacl_clang(args)
   else:
     invoke_gcc(args)
