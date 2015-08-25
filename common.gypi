@@ -118,7 +118,7 @@
         ],
 
         'ldflags': [
-          '-Wl,--gc-sections',
+          '-Wl',
         ],
 
         'target_conditions': [

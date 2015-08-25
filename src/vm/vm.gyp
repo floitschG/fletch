@@ -264,7 +264,6 @@
         '../shared/bytecodes.cc',
         '../shared/connection.cc',
         '../shared/flags.cc',
-        '../shared/native_process_posix.cc',
         '../shared/native_socket_macos.cc',
         '../shared/native_socket_linux.cc',
         '../shared/native_socket_posix.cc',
