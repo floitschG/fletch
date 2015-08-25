@@ -15,6 +15,10 @@
 
 namespace fletch {
 
+static bool IsSnapshot(uint8_t* snapshot, uint32_t length) {
+  return length > 2 && snapshot[0] == 0xbe && snapshot[1] == 0xef;
+}
+
 class FletchInstance : public pp::Instance {
  public:
   explicit FletchInstance(PP_Instance instance) : pp::Instance(instance) {
@@ -28,15 +32,24 @@ class FletchInstance : public pp::Instance {
   /// For Fletch we expect a byte-buffer. The module will crash for anything
   /// else.
   virtual void HandleMessage(const pp::Var& var_message) {
-    printf("received message\n");
-    FletchSetup();
-    pp::VarArrayBuffer::VarArrayBuffer buffer(var_message);
-    uint32_t length = buffer.ByteLength();
-    void* buffer_data = buffer.Map();
-    uint8_t* data = static_cast<uint8_t*>(malloc(length));
-    memcpy(data, buffer_data, length);
-    FletchRunSnapshot(data, length);
-    FletchTearDown();
+    printf("received message from JavaScript\n");
+    if (var_message.is_array_buffer()) {
+      pp::VarArrayBuffer::VarArrayBuffer buffer(var_message);
+      uint32_t length = buffer.ByteLength();
+      void* buffer_data = buffer.Map();
+      uint8_t* data = static_cast<uint8_t*>(malloc(length));
+      memcpy(data, buffer_data, length);
+      if (IsSnapshot(data, length)) {
+        printf("Executing snapshot (%d bytes)\n", length);
+        FletchSetup();
+        FletchRunSnapshot(data, length);
+        FletchTearDown();
+        return;
+      }
+    }
+
+    pp::Var var_reply("Not a Snapshot");
+    PostMessage(var_reply);
   }
 };
 
