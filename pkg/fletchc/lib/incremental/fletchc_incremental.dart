@@ -193,12 +193,17 @@ class IncrementalCompiler {
     return _compiler.context.symbols[id];
   }
 
-  DebugInfo createDebugInfo(FletchFunction function) {
-    return _compiler.context.backend.createDebugInfo(function);
+  DebugInfo createDebugInfo(
+      FletchFunction function,
+      FletchSystem currentSystem) {
+    return _compiler.context.backend.createDebugInfo(function, currentSystem);
   }
 
-  DebugInfo debugInfoForPosition(String file, int position) {
-    return _compiler.debugInfoForPosition(file, position);
+  DebugInfo debugInfoForPosition(
+      String file,
+      int position,
+      FletchSystem currentSystem) {
+    return _compiler.debugInfoForPosition(file, position, currentSystem);
   }
 
   int positionInFileFromPattern(String file, int line, String pattern) {

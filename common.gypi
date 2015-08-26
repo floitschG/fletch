@@ -32,7 +32,7 @@
 
     'LK_CPU%': 'cortex-a9',
 
-    'lk_location': '../../../third_party/lk',
+    'lk_path': '<(DEPTH)/../third_party/lk',
 
     'conditions': [
       [ 'OS=="linux"', {
@@ -72,6 +72,7 @@
         'defines': [
           'FLETCH_ENABLE_LIVE_CODING',
           'FLETCH_ENABLE_FFI',
+          'FLETCH_ENABLE_PRINT_INTERCEPTORS',
         ],
 
         'xcode_settings': {
@@ -82,6 +83,7 @@
           'GCC_WARN_NON_VIRTUAL_DESTRUCTOR': 'NO', # -Wno-non-virtual-dtor
           'GCC_ENABLE_CPP_RTTI': 'NO', # -fno-rtti
           'GCC_ENABLE_CPP_EXCEPTIONS': 'NO', # -fno-exceptions
+	  'DEAD_CODE_STRIPPING': 'YES', # -Wl,-dead_strip (mac --gc-sections)
 
           'OTHER_CPLUSPLUSFLAGS' : [
             '<@(common_gcc_cflags_cc)',
@@ -112,6 +114,10 @@
           '-Werror',
           '<@(common_gcc_cflags_c)',
           '-fno-exceptions',
+        ],
+
+        'ldflags': [
+          '-Wl,--gc-sections',
         ],
 
         'target_conditions': [
@@ -468,13 +474,14 @@
               '-mcpu=<(LK_CPU)',
               '-mthumb',
               '-include',
-              '<(lk_location)/build-<(LK_PROJECT)/config.h',
+              'build-<(LK_PROJECT)/config.h',
             ],
 
             'include_dirs': [
-              '-I<(lk_location)/include/',
-              '-I<(lk_location)/arch/arm/include/',
-              '-I<(lk_location)/lib/libm/include/',
+              '<(lk_path)/',
+              '<(lk_path)/include/',
+              '<(lk_path)/arch/arm/include/',
+              '<(lk_path)/lib/libm/include/',
             ],
 
             'ldflags': [
@@ -572,6 +579,14 @@
 
         'defines!': [
           'FLETCH_ENABLE_FFI',
+        ],
+      },
+
+      'fletch_disable_print_interceptors': {
+        'abstract': 1,
+
+        'defines!': [
+          'FLETCH_ENABLE_PRINT_INTERCEPTORS',
         ],
       },
 
@@ -791,7 +806,8 @@
       'ReleaseLK': {
         'inherit_from': [
           'fletch_base', 'fletch_release', 'fletch_lk',
-          'fletch_disable_live_coding', 'fletch_disable_ffi'
+          'fletch_disable_live_coding', 'fletch_disable_ffi',
+          'fletch_disable_print_interceptors',
         ],
       },
     },
