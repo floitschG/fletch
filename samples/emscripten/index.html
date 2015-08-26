@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+  <title>Emscripten Sample</title>
+
+<body>
+  <script type="text/javascript" src="fletch.asm.js"></script>
+  <script type="text/javascript">
+var request = new XMLHttpRequest();
+request.open("GET", "hello.snapshot", true);
+request.responseType = "arraybuffer";
+request.onload = function(event) {
+  var arrayBuffer = request.response;
+  if (arrayBuffer) {
+    console.log("sending snapshot to fletch");
+    var length = arrayBuffer.byteLength;
+    var buf = Module._malloc(length);
+    //var buf8 = new Uint8Array(Module.HEAPU8.buffer, buf, length);
+    //buf8.set(new Uint8Array(arrayBuffer));
+    Module.HEAPU8.set(new Uint8Array(arrayBuffer), buf);
+    Module.ccall("RunSnapshotFromEmscripten",
+        "number",  // Return type.
+        ["number", "number"],  // Argument types. 'number' is used for void*.
+        [buf, length]);
+    Module._free(buf);
+  }
+};
+request.send(null);
+</script>
+</body>
+</html>
