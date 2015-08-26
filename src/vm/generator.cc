@@ -23,8 +23,10 @@ Generator::Generator(Function* function, const char* name)
 }
 
 void Generator::Generate(Assembler* assembler) {
+  /*
   assembler->Bind(name());
   (*function_)(assembler);
+  */
 }
 
 void Generator::GenerateAll(Assembler* assembler) {

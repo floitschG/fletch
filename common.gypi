@@ -641,7 +641,10 @@
       },
 
       'ReleaseXMIPS': {
-        'inherit_from': [ 'fletch_base', 'fletch_release', 'fletch_xmips' ],
+        'inherit_from': [ 'fletch_base', 'fletch_release', 'fletch_xmips',
+          'fletch_disable_live_coding', 'fletch_disable_ffi',
+          'fletch_disable_print_interceptors',
+          ],
       },
 
       'ReleaseXARM': {
@@ -708,7 +711,10 @@
       },
 
       'DebugXMIPS': {
-        'inherit_from': [ 'fletch_base', 'fletch_debug', 'fletch_xmips' ],
+        'inherit_from': [ 'fletch_base', 'fletch_debug', 'fletch_xmips',
+        'fletch_disable_live_coding', 'fletch_disable_ffi',
+        'fletch_disable_print_interceptors',
+        ],
       },
 
       'DebugXARM': {
