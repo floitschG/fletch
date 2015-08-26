@@ -67,7 +67,7 @@ const int MB = KB * KB;
 const int GB = KB * KB * KB;
 
 #if __BYTE_ORDER != __LITTLE_ENDIAN
-#error "Only little endian hosts are supported"
+//#error "Only little endian hosts are supported"
 #endif
 
 // A macro to disallow the copy constructor and operator= functions.
