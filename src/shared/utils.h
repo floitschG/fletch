@@ -158,22 +158,46 @@ class Utils {
 
   // Read a 32-bit integer from the buffer, as little endian.
   static inline int32 ReadInt32(uint8* buffer) {
-    return reinterpret_cast<int32*>(buffer)[0];
+    return (static_cast<int32>(buffer[3]) << 24) |
+           (static_cast<int32>(buffer[2]) << 16) |
+           (static_cast<int32>(buffer[1]) << 8) |
+           buffer[0];
+    // return reinterpret_cast<int32*>(buffer)[0];
   }
 
   // Write a 32-bit integer to the buffer, as little endian.
   static inline void WriteInt32(uint8* buffer, int32 value) {
-    reinterpret_cast<int32*>(buffer)[0] = value;
+    buffer[3] = static_cast<int8>(value >> 24);
+    buffer[2] = static_cast<int8>(value >> 16);
+    buffer[1] = static_cast<int8>(value >> 8);
+    buffer[0] = static_cast<int8>(value);
+//    reinterpret_cast<int32*>(buffer)[0] = value;
   }
 
   // Read a 64-bit integer from the buffer, as little endian.
   static inline int64 ReadInt64(uint8* buffer) {
-    return reinterpret_cast<int64*>(buffer)[0];
+    return (static_cast<int64>(buffer[7]) << 56) |
+           (static_cast<int64>(buffer[6]) << 48) |
+           (static_cast<int64>(buffer[5]) << 40) |
+           (static_cast<int64>(buffer[4]) << 32) |
+           (static_cast<int64>(buffer[3]) << 24) |
+           (static_cast<int64>(buffer[2]) << 16) |
+           (static_cast<int64>(buffer[1]) << 8) |
+           buffer[0];
+//    return reinterpret_cast<int64*>(buffer)[0];
   }
 
   // Write a 64-bit integer to the buffer, as little endian.
   static inline void WriteInt64(uint8* buffer, int64 value) {
-    reinterpret_cast<int64*>(buffer)[0] = value;
+    buffer[7] = static_cast<int8>(value >> 56);
+    buffer[6] = static_cast<int8>(value >> 48);
+    buffer[5] = static_cast<int8>(value >> 40);
+    buffer[4] = static_cast<int8>(value >> 32);
+    buffer[3] = static_cast<int8>(value >> 24);
+    buffer[2] = static_cast<int8>(value >> 16);
+    buffer[1] = static_cast<int8>(value >> 8);
+    buffer[0] = static_cast<int8>(value);
+//    reinterpret_cast<int64*>(buffer)[0] = value;
   }
 };
 
