@@ -61,7 +61,7 @@
       ],
       'link_settings': {
         'libraries': [
-          '-ltcmalloc_minimal',
+          #'-ltcmalloc_minimal',
           '-lpthread',
           '-ldl',
           # TODO(ahe): Not sure this option works as intended on Mac.
@@ -197,6 +197,17 @@
       'sources': [
         # TODO(ahe): Add header (.h) files.
         'main.cc',
+      ],
+    },
+    {
+      'target_name': 'mips-vm',
+      'type': 'executable',
+      'dependencies': [
+        'libfletch',
+      ],
+      'sources': [
+        # TODO(ahe): Add header (.h) files.
+        'mips.cc',
       ],
     },
     {
