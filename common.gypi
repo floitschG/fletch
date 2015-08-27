@@ -151,7 +151,7 @@
         },
 
         'cflags': [
-          '-O3',
+          '-O2',
           '-fomit-frame-pointer',
         ],
       },
@@ -602,12 +602,12 @@
 
         'xcode_settings': { # And ninja.
           'OTHER_CPLUSPLUSFLAGS': [
-            '-g',
+#            '-g',
           ],
         },
 
         'cflags': [
-          '-g',
+#          '-g',
           '-s USE_PTHREADS=1',
           '-s ASSERTIONS=1',
           '-s EXPORTED_FUNCTIONS="[\'_RunSnapshotFromEmscripten\']"',
@@ -641,6 +641,7 @@
               'ldflags': [
                 # Fake define intercepted by cc_wraper.py.
                 '-L/FLETCH_EMSCRIPTEN',
+                '-O2',
                 '-s USE_PTHREADS=1',
                 '-s EXPORTED_FUNCTIONS="[\'_RunSnapshotFromEmscripten\']"',
               ],
